@@ -4,3 +4,6 @@
 [submodule "formosa-25519"]
 	path = formosa-25519
 	url = git@github.com:formosa-crypto/formosa-25519.git
+[submodule "formosa-mlkem"]
+	path = formosa-mlkem
+	url = git@github.com:formosa-crypto/formosa-mlkem.git
