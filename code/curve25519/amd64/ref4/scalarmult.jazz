@@ -1,3 +1,4 @@
+
 require "curve25519.jinc"
 
 export fn jade_scalarmult_curve25519_amd64_ref4(

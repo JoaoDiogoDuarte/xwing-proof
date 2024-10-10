@@ -9,4 +9,5 @@ rdirs = crypto-specs/common
 rdirs = crypto-specs/fips202
 rdirs = crypto-specs/ml-kem
 rdirs = formosa-25519/proof/crypto_scalarmult/curve25519/amd64/common/
-rdirs = xwing/
+rdirs = proof/
+rdirs = code/xwing/
