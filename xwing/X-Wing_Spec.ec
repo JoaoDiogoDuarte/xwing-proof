@@ -10,8 +10,9 @@ type ciphertext = Top.MLKEM.ciphertext * W8.t Array32.t. (* [ct_M; ct_X] *)
 
 
 op SHA3_256_134_32 (x: W8.t Array6.t * W8.t Array32.t * W8.t Array32.t * W8.t Array32.t * W8.t Array32.t): W8.t Array32.t =
- Array32.of_list W8.zero (SHA3_256
-     (to_list x.`1 ++ to_list x.`2 ++ to_list x.`3 ++ to_list x.`4 ++ to_list x.`5)).
+    Array32.of_list W8.zero (SHA3_256 (to_list x.`1 ++ to_list x.`2 ++ to_list x.`3 ++ to_list x.`4 ++ to_list x.`5)).
+
+op get_xwing_label : W8.t Array6.t = Array6.of_list W8.zero [W8.of_int 92; W8.of_int 46; W8.of_int 47; W8.of_int 47; W8.of_int 94; W8.of_int 92].
 
 module XWing = {
 
@@ -32,8 +33,8 @@ module XWing = {
 
   }
 
-  proc enc_derand(pk : publickey, coins: W8.t Array32.t * W8.t Array32.t, xwing_label : W8.t Array6.t) : ciphertext * sharedsecret = {
-        var pk_M, pk_X, ek_X, ct_X, ct_X_256, ss_X, ss_X_256, ss_M, ct_M, ss, ct, c_M;
+  proc enc_derand(pk : publickey, coins: W8.t Array32.t * W8.t Array32.t) : ciphertext * sharedsecret = {
+        var pk_M, pk_X, ek_X, ct_X, ct_X_256, ss_X, ss_X_256, ss_M, ct_M, ss, ct, c_M, xwing_label;
         pk_M <- pk.`1;
         pk_X <- pk.`2;
         ek_X <- coins.`2;
@@ -47,14 +48,15 @@ module XWing = {
 
         (ct_M, ss_M) <@ MLKEM.enc_derand(pk_M, c_M);
 
+        xwing_label <- get_xwing_label;
         ss <- SHA3_256_134_32(xwing_label, ss_M, ss_X, ct_X, pk_X);
         ct <- (ct_M, ct_X);
 
         return (ct, ss);
   }
 
-  proc dec(cph : ciphertext, sk : secretkey, xwing_label : W8.t Array6.t) : sharedsecret = {
-        var sk_M, sk_X, pk_X, ct_M, ct_X, ss_M, ss_X_256, ss_X, ss;
+  proc dec(cph : ciphertext, sk : secretkey) : sharedsecret = {
+        var sk_M, sk_X, pk_X, ct_M, ct_X, ss_M, ss_X_256, ss_X, ss, xwing_label;
         ct_M <- cph.`1;
         ct_X <- cph.`2;
         sk_M <- sk.`1;
@@ -66,6 +68,7 @@ module XWing = {
         ss_X_256 <@ CurveProcedures.scalarmult(W32u8.pack32 (to_list sk_X), W32u8.pack32 (to_list pk_X));
         ss_X <- Array32.of_list W8.zero (W32u8.to_list ss_X_256);
 
+        xwing_label <- get_xwing_label;
         ss <- SHA3_256_134_32(xwing_label, ss_M, ss_X, ct_X, pk_X);
         return ss;
   }
